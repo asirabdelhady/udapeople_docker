@@ -1,0 +1,39 @@
+version: '3'
+services:
+#  migration:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    links:
+#      - postgres
+#    depends_on:
+#      - postgres
+#    env_file:
+#      - ./backend/development.env
+  postgres:
+    image: postgres
+    ports: 
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD="postgres"
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+  backend:
+    depends_on:
+      - postgres
+#      - migration
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    command: sh -c "npm run migrations > migrations.txt && pm2-runtime start dist/main.js"
+  frontend: 
+    depends_on:
+#      - postgres
+      - backend
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
